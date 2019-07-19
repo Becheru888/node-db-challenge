@@ -1,14 +1,14 @@
 const express = require('express')
 const server = express()
 
-const projectData = require('./data/helpers/project-model')
-const actionData = require('./data/helpers/action-models')
+const ProjectData = require('./data/helpers/project-model')
+const ActionData = require('./data/helpers/action-models')
 
 
 /// Projects .. /////
 
 server.get('/api/projects', (req, res) => {
-  projectData.get()
+  ProjectData.get()
     .then(projects => {
       res.status(200).json(projects);
     })
@@ -19,9 +19,9 @@ server.get('/api/projects', (req, res) => {
 
 server.get('/api/projects/:id', (req, res) => {
   const { id } = req.params;
-  projectData.getWithActions(id)
+  ProjectData.getWithActions(id)
     .then(action => {
-      projectData.get(id)
+      ProjectData.get(id)
         .then(project => {
           project.actions = action;
           res.status(200).json(project);
@@ -35,13 +35,15 @@ server.get('/api/projects/:id', (req, res) => {
     });
 });
 
-server.post('/api/projects', async (req, res) => {
-  const projectDatas = req.body;
-try{
-    const project = await projectData.addProject(projectDatas)
-    res.status(201).json(project)
-  }catch(error){
-    res.status(500).json('Failed to create project')
+server.post("/api/projects", async (req, res) => {
+  try {
+    console.log(req.body)
+    const project = await ProjectData.addProject(req.body);
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to add new project."
+    });
   }
 });
 
@@ -49,7 +51,7 @@ server.put('/api/projects/:id', (req, res) => {
   const { id } = req.params;
   const { name, description } = req.body;
 
-  projectData.update(id, { name, description })
+  ProjectData.update(id, { name, description })
     .then(count => {
       if (count) return res.status(200).json({ message: `${count} project updated` });
       res.status(404).json({ message: '404 project not found' });
@@ -62,7 +64,7 @@ server.put('/api/projects/:id', (req, res) => {
 server.delete('/api/projects/:id', (req, res) => {
   const { id } = req.params;
 
-  projectData.remove(id)
+  ProjectData.remove(id)
     .then(count => {
       if (count) return res.status(200).json({ message: `${count} project deleted` });
       res.status(404).json({ message: '404 project not found' });
@@ -76,7 +78,7 @@ server.delete('/api/projects/:id', (req, res) => {
 /// Actions ///
 
 server.get('/api/actions', (req, res) => {
-  actionData.get()
+  ActionData.get()
     .then(actions => {
       res.status(200).json(actions);
     })
@@ -88,7 +90,7 @@ server.get('/api/actions', (req, res) => {
 server.post('/api/actions', (req, res) => {
   const action = req.body;
 
-  actionData.insert(action)
+  ActionData.insert(action)
     .then(id => {
       res.status(201).json({ message: `ID ${id} created` });
     })
@@ -101,7 +103,7 @@ server.put('/api/actions/:id', (req, res) => {
   const { id } = req.params;
   const action = req.body;
 
-  actionData.update(id, action)
+  ActionData.update(id, action)
     .then(count => {
       if (count) return res.status(200).json({ message: `${count} action updated` });
       res.status(404).json({ message: '404 project not found' });
@@ -114,7 +116,7 @@ server.put('/api/actions/:id', (req, res) => {
 server.delete('/api/actions/:id', (req, res) => {
   const { id } = req.params;
 
-  actionData.remove(id)
+  ActionData.remove(id)
     .then(count => {
       if (count) return res.status(200).json({ message: `${count} action deleted` });
       res.status(404).json({ message: '404 project not found' });

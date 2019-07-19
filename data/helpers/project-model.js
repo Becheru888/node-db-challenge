@@ -21,9 +21,11 @@ function getWithActions(id) {
 }
 
 function addProject(project) {
-    return db('projects')
-        .insert(project)
-        .then(ids => ({ id: ids[0] }))
+  return db("project")
+    .insert({
+      name: project.name,
+      description: project.description})
+    .then(([id]) => this.getProject(id))
 }
 
 function update(id, project) {
