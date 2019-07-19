@@ -1,8 +1,11 @@
 const express = require('express')
 const server = express()
+server.use(express.json())
 
 const ProjectData = require('./data/helpers/project-model')
 const ActionData = require('./data/helpers/action-models')
+
+
 
 
 /// Projects .. /////
@@ -87,16 +90,14 @@ server.get('/api/actions', (req, res) => {
     });
 });
 
-server.post('/api/actions', (req, res) => {
-  const action = req.body;
-
-  ActionData.insert(action)
-    .then(id => {
-      res.status(201).json({ message: `ID ${id} created` });
-    })
-    .catch(err => {
-      res.status(500).json({ message: '500 error creating', err })
-    });
+server.post('/api/actions', async (req, res) => {
+  try{
+    const projectData = req.body
+    const project = await ActionData.insert(projectData)
+    res.status(200).json(project)
+  }catch(error){
+    res.status(404).json(error)
+  }
 });
 
 server.put('/api/actions/:id', (req, res) => {
